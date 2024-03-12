@@ -1,15 +1,152 @@
 #!/usr/bin/env python
 
 import logging
+import os
+import random
+import time
 
-from telegram import Update, ForceReply
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, CallbackContext
+
+FIRST_NAMES = [
+    'Подрыв',
+    'Ушат',
+    'Поджог',
+    'Погром',
+    'Обвал',
+    'Угон',
+    'Исход',
+    'Захват',
+    'Камаз',
+    'Развод',
+    'Удар',
+    'Курган',
+    'Загон',
+    'Запой',
+    'Разрез',
+    'Разгул',
+    'Разбор',
+    'Учет',
+    'Друган',
+    'Улов',
+    'Рулон',
+    'Подшум',
+    'Разгул',
+    'Пиздабол',
+    'Дружбан',
+    'Вжбан',
+    'Еблан',
+    'Лажан',
+    'Охуен',
+    'Ёптить',
+    'Ебун',
+    'Парад',
+    'Забой',
+    'Мешок',
+    'Карман',
+    'Пакет',
+    'Залог',
+    'Залуп',
+    'Отлуп',
+    'Куколд',
+    'Рукоблуд',
+    'Гормон',
+    'Хунан',
+    'Хулинам',
+    'Ахулинам',
+    'Чувак',
+    'Завали',
+    'Пахан',
+    'Глашатай',
+    'Стояк'
+]
+
+SECOND_NAMES = [
+    'Помоев',
+    'Устоев',
+    'Сараев',
+    'Евреев',
+    'Забоев',
+    'Харлеев',
+    'Изгоев',
+    'Покоев',
+    'Отходов',
+    'Супругов',
+    'Морозов',
+    'Отбросов',
+    'Баранов',
+    'Гусаров',
+    'Батонов',
+    'Гормонов',
+    'Полетов',
+    'Расходов',
+    'Братанов',
+    'Кальмаров',
+    'Обоев',
+    'Прибоев',
+    'Кисколизов',
+    'Сувениров',
+    'Крахмалов',
+    'Охуеннов',
+    'Приколов',
+    'Данунахов',
+    'Ебланов',
+    'Ебашев',
+    'Валенков',
+    'Колотунов',
+    'Подъебанов',
+    'Лошпетов',
+    'Уродов',
+    'Баранов',
+    'Лимонов',
+    'Пистонов',
+    'Гандонов',
+    'Табунов',
+    'Пиздоев',
+    'Рукоблудов',
+    'Дрочев',
+    'Приколов',
+    'Залупов',
+    'Проёбов',
+    'Затрахов',
+    'Колотунов',
+    'Задрищев',
+    'Ичпочмаков',
+    'Эпочмаков',
+    'Разгуляев',
+    'Расстегаев',
+    'Невъебенов',
+    'Ебало',
+    'Ебалов',
+    'Задрочев',
+    'Задротов',
+    'Уёбков',
+    'Шакалов',
+    'Колбасов',
+    'Разрабов',
+    'Барменов',
+    'Разбоев',
+    'Зелебобов',
+    'Данунахов',
+    'Сиськолизов',
+    'Письколизов',
+    'Нестоянов'
+]
+
+
+def gen_name():
+    random.seed(time.time() / time.perf_counter() * time.process_time())
+    first_name = random.choice(FIRST_NAMES)
+    random.seed(len(first_name) * time.time() / time.perf_counter() * time.process_time())
+    second_name = random.choice(SECOND_NAMES)
+    return f'{first_name} {second_name}'
+
 
 # включаем логгирование
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(_name_)
 
 
 # это обработчики команд (handler-ы). Обычно приниают вот эти два параметра, которые содержат нужный
@@ -19,15 +156,9 @@ logger = logging.getLogger(__name__)
 # вот обработчик команды /start. Когда пользователь вводит /start, вызывается эта функция
 # то же самое происходит, если пользователь выберет команду start из списка команд (это
 # сделаем позже в BotFather)
-def start(engine: Update, context: CallbackContext) -> None:
-    # получаем имя пользователя, которое он указал у себя в настройках телеграма,
-    # из нашего "движка"
-    user = engine.effective_user
-    # отправляем нашему пользователю приветственное сообщение
-    engine.message.reply_markdown_v2(
-        fr'Привет, {user.mention_markdown_v2()}\!',
-        reply_markup=ForceReply(selective=True),
-    )
+def generate_name(engine: Update, context: CallbackContext) -> None:
+    print('generate_name()')
+    engine.message.reply_text(gen_name(), reply_to_message_id=None)
 
 
 # другой обработчик - для команды /help. Когда пользователь вводит /help, вызывается этот код
@@ -51,7 +182,7 @@ def main() -> None:
     #
     # я назвал его engine (движок), чтобы было понятнее. В самой либе (библиотеке, фреймворке)
     # он называется Updater, как видно, что немного запутывает
-    engine = Updater("вставить токен тут")
+    engine = Updater(os.getenv('DP_TG_BOT_TOKEN'))
 
     # получаем объект "передатчика" или обработчика сообщений от нашего движка
     dispatcher = engine.dispatcher
@@ -62,7 +193,7 @@ def main() -> None:
     # call back - дословно, что-то вроде вызвать обратно, то есть наша функция, которую мы передали,
     # вызовется позже в ответ на какое-то событие; в нашем случае они будут вызываться тогда, когда
     # пользователь будет выбирать соответствующие команды
-    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("generate", generate_name))
     dispatcher.add_handler(CommandHandler("help", help_command))
 
     # говорим обработчику сообений, чтобы он вызывал функцию echo каждый раз,
@@ -72,7 +203,8 @@ def main() -> None:
     # он означает, что функция echo будет вызываться только тогда, когда пользователь
     # ввел именно текст, а не команду; в противном случае, если пользователь введет
     # команду /start или /help, эта функция будет вызвана, что нам не нужно
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+    # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+    # dispatcher.add_handler(MessageHandler(Filters.user("@russian_name_generator_bot"), generate_name))
 
     # непосредственно старт бота
     engine.start_polling()
@@ -81,5 +213,5 @@ def main() -> None:
     engine.idle()
 
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     main()
